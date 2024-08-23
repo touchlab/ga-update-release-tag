@@ -31197,19 +31197,8 @@ async function run() {
         const git = (0, simple_git_1.default)();
         await git.pull();
         await git.checkoutLocalBranch(branchName);
-        const diff = await git.diffSummary();
-        if (diff.changed > 0) {
-            core.info("Code changed. Add and commit.");
-            for (const diffFile of diff.files) {
-                core.debug(`-- ${diffFile.file}`);
-            }
-            await git.add('.');
-            await git.commit(commitMessage);
-        }
-        else {
-            core.error("No diff found. Nothing to update.");
-            core.setFailed("No diff found. Nothing to update.");
-        }
+        await git.add('.');
+        await git.commit(commitMessage);
         await git.raw('tag', '-fa', tagVersion, '-m', tagMessage);
         await git.raw('push', 'origin', '-f', `refs/tags/${tagVersion}`);
     }
