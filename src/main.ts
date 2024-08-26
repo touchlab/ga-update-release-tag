@@ -6,12 +6,14 @@ export async function run(): Promise<void> {
     const commitMessage: string = core.getInput('commitMessage')
     const tagMessage: string = core.getInput('tagMessage')
     const tagVersion: string = core.getInput('tagVersion')
-    const branchName: string = core.getInput('branchName')
+    let branchName: string = core.getInput('branchName')
 
     core.debug(`commitMessage: ${commitMessage}`)
     core.debug(`tagMessage: ${tagMessage}`)
     core.debug(`tagVersion: ${tagVersion}`)
     core.debug(`branchName: ${branchName}`)
+
+    branchName = branchName ? branchName : `build-${tagVersion}`
 
     const git = simpleGit()
 

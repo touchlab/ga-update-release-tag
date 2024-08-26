@@ -31189,11 +31189,12 @@ async function run() {
         const commitMessage = core.getInput('commitMessage');
         const tagMessage = core.getInput('tagMessage');
         const tagVersion = core.getInput('tagVersion');
-        const branchName = core.getInput('branchName');
+        let branchName = core.getInput('branchName');
         core.debug(`commitMessage: ${commitMessage}`);
         core.debug(`tagMessage: ${tagMessage}`);
         core.debug(`tagVersion: ${tagVersion}`);
         core.debug(`branchName: ${branchName}`);
+        branchName = branchName ? branchName : `build-${tagVersion}`;
         const git = (0, simple_git_1.default)();
         await git.pull();
         await git.checkoutLocalBranch(branchName);
