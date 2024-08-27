@@ -20,6 +20,12 @@ inputs:
   branchName:
     description: 'Branch name'
     required: false
+  repoPath:
+    description: 'Local path to repo. Generally used for worktrees.'
+    required: false
+  remote:
+    description: 'Remote to push to. Default to "origin".'
+    required: false
 
 runs:
   using: node20

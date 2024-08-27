@@ -31190,18 +31190,23 @@ async function run() {
         const tagMessage = core.getInput('tagMessage');
         const tagVersion = core.getInput('tagVersion');
         let branchName = core.getInput('branchName');
+        const repoPath = core.getInput('repoPath');
+        let remote = core.getInput('remote');
         core.debug(`commitMessage: ${commitMessage}`);
         core.debug(`tagMessage: ${tagMessage}`);
         core.debug(`tagVersion: ${tagVersion}`);
         core.debug(`branchName: ${branchName}`);
+        core.debug(`repoPath: ${repoPath}`);
+        core.debug(`remote: ${remote}`);
         branchName = branchName ? branchName : `build-${tagVersion}`;
-        const git = (0, simple_git_1.default)();
-        await git.pull();
+        remote = remote ? remote : "origin";
+        const git = repoPath ? (0, simple_git_1.default)(repoPath) : (0, simple_git_1.default)();
+        await git.pull(remote);
         await git.checkoutLocalBranch(branchName);
         await git.add('.');
         await git.commit(commitMessage);
         await git.raw('tag', '-fa', tagVersion, '-m', tagMessage);
-        await git.raw('push', 'origin', '-f', `refs/tags/${tagVersion}`);
+        await git.raw('push', remote, '-f', `refs/tags/${tagVersion}`);
     }
     catch (error) {
         // Fail the workflow run if an error occurs
