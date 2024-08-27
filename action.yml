@@ -1,27 +1,23 @@
-name: 'KXCBridge: Tag Release'
-description: 'Tag version for SPM'
+name: 'KMMBridge: Local SPM Publishing Support'
+description: 'Commit and tag SPM version.'
 author: 'Kevin Galligan'
 
-# Add your action's branding here. This will appear on the GitHub Marketplace.
 branding:
-  icon: 'heart'
-  color: 'red'
+  icon: 'git-branch'
+  color: 'orange'
 
 inputs:
   commitMessage:
-    description: 'Message for Package.swift commit'
+    description: 'Message for the commit which updates the `Package.swift` file.'
     required: true
   tagMessage:
-    description: 'Message for release tag'
-    required: true
+    description: 'Message for the release tag. Defaults to "Version ${tagVersion}".'
+    required: false
   tagVersion:
-    description: 'The release version'
+    description: 'Version string to use in the tag. Should follow [semver rules](https://semver.org/).'
     required: true
   branchName:
-    description: 'Branch name'
-    required: false
-  repoPath:
-    description: 'Local path to repo. Generally used for worktrees.'
+    description: 'Branch to create and build with. Safe to ignore this.'
     required: false
   remote:
     description: 'Remote to push to. Default to "origin".'
