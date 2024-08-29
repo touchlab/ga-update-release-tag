@@ -31184,23 +31184,39 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const simple_git_1 = __importDefault(__nccwpck_require__(9103));
+function notEmpty(p) {
+    return p && p.trim().length > 0;
+}
+function assertNotEmpty(p, message) {
+    if (!notEmpty(p)) {
+        core.setFailed(message);
+        throw new Error(message);
+    }
+}
 async function run() {
+    const commitMessage = core.getInput('commitMessage');
+    let tagMessage = core.getInput('tagMessage');
+    const tagVersion = core.getInput('tagVersion');
+    let branchName = core.getInput('branchName');
+    let remote = core.getInput('remote');
+    core.debug(`commitMessage: ${commitMessage}`);
+    core.debug(`tagMessage: ${tagMessage}`);
+    core.debug(`tagVersion: ${tagVersion}`);
+    core.debug(`branchName: ${branchName}`);
+    core.debug(`remote: ${remote}`);
+    tagMessage = notEmpty(tagMessage) ? tagMessage : `Version ${tagVersion}`;
+    remote = notEmpty(remote) ? remote : 'origin';
+    branchName = notEmpty(branchName) ? branchName : `build-${tagVersion}`;
+    assertNotEmpty(commitMessage, '\'commitMessage\' cannot be empty');
+    assertNotEmpty(tagVersion, '\'tagVersion\' cannot be empty');
     try {
-        const commitMessage = core.getInput('commitMessage');
-        const tagMessage = core.getInput('tagMessage');
-        const tagVersion = core.getInput('tagVersion');
-        const branchName = core.getInput('branchName');
-        core.debug(`commitMessage: ${commitMessage}`);
-        core.debug(`tagMessage: ${tagMessage}`);
-        core.debug(`tagVersion: ${tagVersion}`);
-        core.debug(`branchName: ${branchName}`);
         const git = (0, simple_git_1.default)();
-        await git.pull();
+        await git.pull(remote);
         await git.checkoutLocalBranch(branchName);
         await git.add('.');
         await git.commit(commitMessage);
         await git.raw('tag', '-fa', tagVersion, '-m', tagMessage);
-        await git.raw('push', 'origin', '-f', `refs/tags/${tagVersion}`);
+        await git.raw('push', remote, '-f', `refs/tags/${tagVersion}`);
     }
     catch (error) {
         // Fail the workflow run if an error occurs
