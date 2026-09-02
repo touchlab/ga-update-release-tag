@@ -8,13 +8,17 @@ branding:
 
 inputs:
   commitMessage:
-    description: 'Message for the commit which updates the `Package.swift` file.'
+    description:
+      'Message for the commit which updates the `Package.swift` file.'
     required: true
   tagMessage:
-    description: 'Message for the release tag. Defaults to "Version ${tagVersion}".'
+    description:
+      'Message for the release tag. Defaults to "Version ${tagVersion}".'
     required: false
   tagVersion:
-    description: 'Version string to use in the tag. Should follow [semver rules](https://semver.org/).'
+    description:
+      'Version string to use in the tag. Should follow [semver
+      rules](https://semver.org/).'
     required: true
   branchName:
     description: 'Branch to create and build with. Safe to ignore this.'
@@ -24,5 +28,5 @@ inputs:
     required: false
 
 runs:
-  using: node20
+  using: node24
   main: dist/index.js

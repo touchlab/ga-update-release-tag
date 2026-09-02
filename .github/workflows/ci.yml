@@ -19,11 +19,11 @@ jobs:
     steps:
       - name: Checkout
         id: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node.js
         id: setup-node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version-file: .node-version
           cache: npm
@@ -51,14 +51,43 @@ jobs:
     steps:
       - name: Checkout
         id: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
+
+      # The action commits and force-pushes a tag to the remote it is given, so
+      # it is pointed at a throwaway bare repo here - never at `origin`.
+      - name: Set Up Throwaway Remote
+        id: setup-remote
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git init --bare "${RUNNER_TEMP}/test-remote.git"
+          git checkout -B ci-test-branch
+          git remote add testremote "${RUNNER_TEMP}/test-remote.git"
+          git push testremote ci-test-branch
+          git branch --set-upstream-to=testremote/ci-test-branch ci-test-branch
+          echo 'binary url placeholder' > Package.swift
 
       - name: Test Local Action
         id: test-action
         uses: ./
         with:
-          milliseconds: 2000
+          commitMessage: 'Update Package.swift'
+          tagVersion: '9.9.9-ci'
+          remote: 'testremote'
 
-      - name: Print Output
-        id: output
-        run: echo "${{ steps.test-action.outputs.time }}"
+      - name: Verify Tag Was Pushed
+        id: verify
+        run: |
+          tags="$(git --git-dir="${RUNNER_TEMP}/test-remote.git" tag -l)"
+          echo "tags: ${tags}"
+          if [ "${tags}" != "9.9.9-ci" ]; then
+            echo "::error::expected tag 9.9.9-ci in the test remote, got '${tags}'"
+            exit 1
+          fi
+          # The tagged commit must carry the updated file...
+          git --git-dir="${RUNNER_TEMP}/test-remote.git" show 9.9.9-ci:Package.swift
+          # ...and must not have been pushed onto any branch.
+          if git --git-dir="${RUNNER_TEMP}/test-remote.git" branch --contains 9.9.9-ci 2>/dev/null | grep -q .; then
+            echo "::error::tagged commit unexpectedly reachable from a branch"
+            exit 1
+          fi
