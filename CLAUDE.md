@@ -21,7 +21,7 @@ template.
 
 ```bash
 npm install            # node_modules is not checked in
-npm run package        # ncc bundle src/index.ts -> dist/  (REQUIRED after any src change)
+npm run package        # ncc bundle -> dist/ (REQUIRED after any src change)
 npm run bundle         # format:write + package
 npm run all            # format + lint + test + coverage badge + package
 npm run format:check   # what CI runs
@@ -110,10 +110,29 @@ PR.
 ## Linting split
 
 `npm run lint` / `npm run format:check` (ci.yml) own TypeScript and formatting.
-super-linter (linter.yml) has ESLint and Prettier explicitly disabled, because
-it ships its own copies that can't resolve this repo's plugins and would
-disagree on formatting; it covers Markdown, YAML, Bash, workflow syntax and
-secret scanning instead.
+super-linter (linter.yml) has ESLint, Prettier **and Biome** explicitly
+disabled, because it ships its own copies that can't resolve this repo's plugins
+and would disagree on formatting; it covers Markdown, YAML, Bash, workflow
+syntax and secret scanning instead.
+
+Three things about super-linter v8 that cost a red build once:
+
+- **Biome (`VALIDATE_BIOME_FORMAT` / `VALIDATE_BIOME_LINT`) is on by default**
+  and is a third formatter whose defaults — semicolons, double quotes, tabs —
+  are the exact opposite of `.prettierrc.json`. It rewrites every file ci.yml
+  just checked clean. Keep both off.
+- **`FILTER_REGEX_EXCLUDE` is a regular expression, not a glob.** `dist/**/*`
+  silently matches nothing, which is how the committed bundle ended up being
+  linted.
+- **zizmor (`VALIDATE_GITHUB_ACTIONS_ZIZMOR`) audits the workflows** and
+  requires hash-pinned actions, `persist-credentials: false` on checkouts, and a
+  `cooldown:` in `dependabot.yml`. All of that is satisfied in-tree; keep it
+  that way rather than disabling the audit. `uvx zizmor@<version> .github/`
+  reproduces it locally — match the version super-linter reports.
+
+Setting some `VALIDATE_*` to `true` and others to `false` in the same env block
+makes super-linter fail outright. Everything here is `false`, so unset linters
+default to on.
 
 ## Releasing
 
