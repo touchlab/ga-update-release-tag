@@ -68,7 +68,7 @@
   },
   "dependencies": {
     "@actions/core": "^2.0.3",
-    "simple-git": "^3.36.0"
+    "simple-git": "^4.0.2"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
